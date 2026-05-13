@@ -1,0 +1,6 @@
+This checkpoint represents the exact moment the agent graduated from Phase 4 (Worlds 1 and 2 integrated).
+
+Step count at graduation: 124,374,264
+Original filename: mario_ppo_phase5_final.zip
+
+At this point, the agent had successfully generalized its jumping policy to clear all 7 land levels of Worlds 1 and 2, while maintaining enough water movement to clear the 50% rolling average target threshold.

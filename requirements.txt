@@ -1,0 +1,17 @@
+# Core RL
+stable-baselines3[extra]==2.8.0
+gymnasium==1.2.3
+
+# NES emulation
+gym-super-mario-bros==7.4.0
+nes-py==8.2.1
+
+# Vision
+opencv-python==4.13.0.92
+
+# NumPy pinned to 1.x — upgrading to 2.x causes OverflowError in NES wrappers
+numpy==1.26.4
+
+# PyTorch — install separately for your CUDA version:
+#   pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128
+# torch==2.9.0+cu128

@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+
+# Virtual environment
+venv*/
+
+# Model checkpoints (~20MB each, hundreds of files)
+models_v2/*.zip
+models_game/
+models_coinmaxx/
+
+# TensorBoard logs
+logs/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+Thumbs.db
+.DS_Store
