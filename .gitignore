@@ -5,11 +5,15 @@ __pycache__/
 dist/
 build/
 
+# Testing scratchpads
+test_*.py
+
 # Virtual environment
 venv*/
 
 # Model checkpoints (~20MB each, hundreds of files)
 models_v2/*.zip
+!models_v2/mario_ppo_latest.zip
 models_game/
 models_coinmaxx/
 

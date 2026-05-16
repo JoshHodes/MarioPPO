@@ -25,14 +25,23 @@ from stable_baselines3.common.vec_env import DummyVecEnv, VecFrameStack
 from train import MarioWrapper, MarioReward, SkipFrame, CURRICULUM_STAGES, load_curriculum_state
 
 # Fix pyglet 1.5.x bug on 64-bit Windows: HWND overflow
-import ctypes
-from pyglet.libs.win32 import _user32
-_user32.CreateWindowExW.restype  = ctypes.c_void_p
-_user32.GetDC.argtypes           = [ctypes.c_void_p]
-_user32.ReleaseDC.argtypes       = [ctypes.c_void_p, ctypes.c_void_p]
+import sys
+if sys.platform == 'win32':
+    import ctypes
+    from pyglet.libs.win32 import _user32
+    _user32.CreateWindowExW.restype  = ctypes.c_void_p
+    _user32.GetDC.argtypes           = [ctypes.c_void_p]
+    _user32.ReleaseDC.argtypes       = [ctypes.c_void_p, ctypes.c_void_p]
 
 MODELS_DIR = './models_v2/'
 
+def extract_nes_env(env):
+    if hasattr(env, 'viewer'): return env
+    if hasattr(env, 'env'): return extract_nes_env(env.env)
+    if hasattr(env, 'envs'): return extract_nes_env(env.envs[0])
+    if hasattr(env, 'venv'): return extract_nes_env(env.venv)
+    if hasattr(env, 'unwrapped') and hasattr(env.unwrapped, 'viewer'): return env.unwrapped
+    return env
 
 def get_latest_model():
     files = glob.glob(os.path.join(MODELS_DIR, 'mario_ppo_*_steps.zip'))
@@ -73,6 +82,7 @@ def main():
     venv        = None
     episode     = 0
     stage_idx   = 0
+    current_stage = None
 
     print("=" * 55)
     print("  Mario Live Watcher — Ctrl+C to stop")
@@ -102,10 +112,28 @@ def main():
                 stage_idx    += 1
 
             # ── Build env for this episode ───────────────────────────
-            if venv is not None:
+            if venv is None:
+                venv = make_env(stage)
+                current_stage = stage
+                obs = venv.reset()
+                # Float window in Hyprland (silently fails if not Hyprland)
+                os.system(f"hyprctl dispatch setfloating pid:{os.getpid()} >/dev/null 2>&1")
+                os.system(f"hyprctl dispatch centerwindow pid:{os.getpid()} >/dev/null 2>&1")
+            elif current_stage != stage:
+                # To prevent piling up windows, transfer the ImageViewer to the new env
+                nes = extract_nes_env(venv)
+                viewer = nes.viewer
+                nes.viewer = None
                 venv.close()
-            venv = make_env(stage)
-            obs  = venv.reset()
+                
+                venv = make_env(stage)
+                nes_new = extract_nes_env(venv)
+                nes_new.viewer = viewer
+                
+                current_stage = stage
+                obs = venv.reset()
+            else:
+                obs = venv.reset()
 
             print(f"\n  Episode {episode + 1} | Stage {stage} | "
                   f"{'Greedy' if args.deterministic else 'Stochastic'} | "

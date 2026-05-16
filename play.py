@@ -11,11 +11,13 @@ from stable_baselines3.common.vec_env import DummyVecEnv, VecFrameStack
 from train import MarioWrapper, MarioReward, SkipFrame
 
 # Fix pyglet 1.5.x bug on 64-bit Windows: HWND overflow
-import ctypes
-from pyglet.libs.win32 import _user32
-_user32.CreateWindowExW.restype = ctypes.c_void_p
-_user32.GetDC.argtypes = [ctypes.c_void_p]
-_user32.ReleaseDC.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
+import sys
+if sys.platform == 'win32':
+    import ctypes
+    from pyglet.libs.win32 import _user32
+    _user32.CreateWindowExW.restype = ctypes.c_void_p
+    _user32.GetDC.argtypes = [ctypes.c_void_p]
+    _user32.ReleaseDC.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
 
 def get_latest_model(models_dir):
     # Prefer step-numbered checkpoints over final/phase saves
@@ -49,6 +51,10 @@ def main():
     venv = VecFrameStack(venv, n_stack=4, channels_order='last')
 
     obs = venv.reset()
+    # Float window in Hyprland (silently fails if not Hyprland)
+    os.system(f"hyprctl dispatch setfloating pid:{os.getpid()} >/dev/null 2>&1")
+    os.system(f"hyprctl dispatch centerwindow pid:{os.getpid()} >/dev/null 2>&1")
+
     print("Evaluating! Ctrl+C to stop.")
     print("-" * 50)
 
