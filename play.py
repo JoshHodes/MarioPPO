@@ -22,8 +22,10 @@ if sys.platform == 'win32':
 def get_latest_model(models_dir):
     # Prefer step-numbered checkpoints over final/phase saves
     files = glob.glob(os.path.join(models_dir, 'mario_ppo_*_steps.zip'))
-    if not files:
-        files = glob.glob(os.path.join(models_dir, '*.zip'))
+    if files:
+        # Parse the step number to guarantee we get the absolute latest, ignoring Linux file copy timestamps
+        return max(files, key=lambda f: int(os.path.basename(f).split('_')[2]))
+    files = glob.glob(os.path.join(models_dir, '*.zip'))
     return max(files, key=os.path.getctime) if files else None
 
 def main():
@@ -61,7 +63,7 @@ def main():
     episode = 0
     try:
         while True:
-            action, _ = model.predict(obs, deterministic=False)  # stochastic — avoids locked-in failures
+            action, _ = model.predict(obs, deterministic=False)  # MUST BE FALSE: Agent relies on training entropy to avoid getting stuck
             obs, rewards, dones, info = venv.step(action)
 
             if dones[0]:

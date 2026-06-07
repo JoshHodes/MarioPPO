@@ -5,20 +5,36 @@ __pycache__/
 dist/
 build/
 
-# Testing scratchpads
-test_*.py
-
 # Virtual environment
 venv*/
 
-# Model checkpoints (~20MB each, hundreds of files)
+# Model checkpoints (large binaries; keep only the showcase model)
+*.pt
 models_v2/*.zip
 !models_v2/mario_ppo_latest.zip
-models_game/
-models_coinmaxx/
+models_v2/remedial/
+models_v2/archive_phase9_stagnated/
+models_v2/archive_collapsed/
 
-# TensorBoard logs
+# Human demonstration data (large .npz; re-recordable via record_demos.py,
+# share via a GitHub Release / Git LFS if needed)
+demos/
+
+# Logs (TensorBoard + run logs)
 logs/
+logs_archive/
+*.log
+
+# Heavy source media — the committed mario_grid.gif is the demo; the mp4 is the
+# large source it was rendered from
+*.mp4
+
+# Internal backups / local assistant state
+backups/
+.claude/
+
+# Personal infra — contains the remote training box's address
+sync_models.sh
 
 # IDE
 .vscode/
@@ -27,3 +43,11 @@ logs/
 # OS
 Thumbs.db
 .DS_Store
+
+# Scratch / one-off debug files
+past_chat_history.md
+validate_and_resume.py
+promote_and_consolidate.py
+test_agent_debug.py
+test_agent_debug2.py
+test_viewer.py
